@@ -8,8 +8,6 @@ public class Main {
 
         var logbote = new Logbote();
         logbote.useCog(Joinlog.class);
-
-        logbote.x();
     }
 }
 
