@@ -16,14 +16,23 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberUpdateEvent;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.yaml.NodeStyle;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.nio.channels.Channel;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class Joinlog extends AbstractGuildCog {
 
+    @ConfigSerializable
     protected static class JoinlogConfig extends GuildCogConfig {
         @Nullable protected Channel joinsLog;
         @Nullable protected Channel usernamesLog;
@@ -77,18 +86,37 @@ public class Joinlog extends AbstractGuildCog {
         }
     }
 
-    private final CommandsGroup commands = new CommandsGroup("joinlog");
-
-    @SlashCommand(name="unban", group=commands)
-    @DefaultPermissions(Permission.BAN_MEMBERS)
-    public CompletableFuture<String> unban(User user, String reason) {
-        this.sendThinking();
-        // ...
-    }
+//    private final CommandsGroup commands = new CommandsGroup("joinlog");
+//
+//    @SlashCommand(name="unban", group=commands)
+//    @DefaultPermissions(Permission.BAN_MEMBERS)
+//    public CompletableFuture<String> unban(User user, String reason) {
+//        this.sendThinking();
+//        // ...
+//    }
 
     @Override
     public void onLoad() {
-
+        System.out.println("joinlog loaded");
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                .path(Path.of(guild.getId()).resolve("joinlog.yml"))
+                .indent(4)
+                .nodeStyle(NodeStyle.BLOCK)
+//                .defaultOptions(options -> options.serializers(builder -> builder.register(JoinlogConfig.class, new JoinlogConfigSerializer())))
+                .build();
+        CommentedConfigurationNode rootConfigNode = null;
+        try {
+            rootConfigNode = loader.load();
+//            var config = rootConfigNode.get(JoinlogConfig.class);
+//            System.out.println(config);
+//            if (config == null) {
+//                config = new JoinlogConfig();
+//                rootConfigNode.set(config);
+//                loader.save(rootConfigNode);
+//            }
+        } catch (ConfigurateException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @EventListener

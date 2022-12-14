@@ -7,8 +7,10 @@ import dev.qixils.quasicolon.cogs.impl.AbstractCog;
 import dev.qixils.quasicolon.cogs.impl.AbstractGlobalCog;
 import dev.qixils.quasicolon.cogs.impl.AbstractGuildCog;
 import dev.qixils.quasicolon.events.EventListener;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 
 import java.lang.reflect.InvocationTargetException;
@@ -26,12 +28,14 @@ public class Logbote {
 
     public Logbote(){
         try {
-            q_cord = new Quasicord.Builder()
+            var builder = new Quasicord.Builder()
                     .namespace("")
                     .configRoot(Path.of("."))
                     .defaultLocale(Locale.ENGLISH)
                     .eventHandler(this)
-                    .build();
+                    .activity(Activity.of(Activity.ActivityType.PLAYING, "TEST ENVIRONMENT"));
+            q_cord =     builder .build();
+//            q_cord.getEventDispatcher().registerListeners(this);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -54,6 +58,7 @@ public class Logbote {
             try {
                 var cog =  T.Load(q_cord, cogType);
                 globalCogs.add(cog);
+                q_cord.getEventDispatcher().registerListeners(cog);
             } catch (InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
@@ -84,7 +89,15 @@ public class Logbote {
 
     @EventListener
     public void onDiscordEvent(Event event) {
+        System.out.println("Event: " + event);
+    }
 
+    @EventListener
+    public void onMessage(MessageReceivedEvent event) {
+        var content = event.getMessage().getContentRaw();
+        if (content.startsWith("?quit")) {
+            q_cord.shutdown();
+        }
     }
 
 //    @EventListener
@@ -101,5 +114,6 @@ public class Logbote {
     public void onReady(ReadyEvent event) {
         System.out.println("Ready.");
         System.out.println("Guilds available: "+event.getGuildAvailableCount() + " of " + event.getGuildTotalCount());
+        x();
     }
 }
