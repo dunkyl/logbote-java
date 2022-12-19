@@ -13,11 +13,16 @@ import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 
+import javax.security.auth.login.LoginException;
+import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+
 
 public class Logbote {
 
@@ -26,19 +31,8 @@ public class Logbote {
     private ArrayList<GlobalCog> globalCogs = new ArrayList<>();
     private HashMap<Long, ArrayList<GuildCog>> guildCogs = new HashMap<Long, ArrayList<GuildCog>>();
 
-    public Logbote(){
-        try {
-            var builder = new Quasicord.Builder()
-                    .namespace("")
-                    .configRoot(Path.of("."))
-                    .defaultLocale(Locale.ENGLISH)
-                    .eventHandler(this)
-                    .activity(Activity.of(Activity.ActivityType.PLAYING, "TEST ENVIRONMENT"));
-            q_cord =     builder .build();
-//            q_cord.getEventDispatcher().registerListeners(this);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    Logbote(Quasicord qcord){
+        q_cord = qcord;
     }
 
     public final <T extends AbstractCog> void useCog(Class<T> cogType){
@@ -116,4 +110,37 @@ public class Logbote {
         System.out.println("Guilds available: "+event.getGuildAvailableCount() + " of " + event.getGuildTotalCount());
         x();
     }
+
+    public static class Builder {
+
+        private Quasicord.Builder qcordBuilder = new Quasicord.Builder();
+
+        public Builder() {
+            qcordBuilder
+                .namespace("")
+                .configRoot(Path.of("."))
+                .defaultLocale(Locale.ENGLISH);
+        }
+
+        public <T> Builder useCog(Class<T> cogClass) {
+            System.out.println("Using cog: " + cogClass);
+            return this;
+        }
+
+        public Builder playing(String playing) {
+            qcordBuilder.activity(Activity.playing(playing));
+            return this;
+        }
+
+        public Logbote build(){
+            try {
+                return new Logbote(qcordBuilder.build());
+            } catch (LoginException | InterruptedException | IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
+
+
 }
