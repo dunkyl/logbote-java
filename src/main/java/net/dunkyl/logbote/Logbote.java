@@ -9,14 +9,11 @@ import dev.qixils.quasicolon.cogs.impl.AbstractGuildCog;
 import dev.qixils.quasicolon.events.EventListener;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.Event;
-import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -122,7 +119,7 @@ public class Logbote {
                 .defaultLocale(Locale.ENGLISH);
         }
 
-        public <T> Builder useCog(Class<T> cogClass) {
+        public <T> Builder cog(Class<T> cogClass) {
             System.out.println("Using cog: " + cogClass);
             return this;
         }
